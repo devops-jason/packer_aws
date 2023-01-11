@@ -1,0 +1,149 @@
+---
+
+- name: Ansible DBI Packer Playbook
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Install system updates for Ubuntu
+      apt:
+        name: '*'
+        state: latest
+        update_cache: yes
+      when: ansible_distribution == 'Ubuntu'
+
+    - name: Install system updates for Amazon
+      yum:
+        name: '*'
+        state: latest
+        update_cache: yes
+      when: ansible_distribution == 'Amazon'
+
+    - name: Install Active Directory related packages (Ubuntu)
+      apt:
+        name: "{{ item }}"
+        state: latest
+      with_items:
+        - realmd
+        - libnss-sss
+        - sssd
+        - sssd-tools
+        - adcli
+        - samba-common-bin
+        - oddjob
+        - oddjob-mkhomedir
+        - packagekit
+      when: ansible_distribution == 'Ubuntu'
+
+    - name: Install Active Directory related packages (Amazon)
+      yum:
+        name: "{{ item }}"
+        state: latest
+      with_items:
+        - realmd
+        - sssd
+        - krb5-workstation
+        - samba-common-tools
+        - sssd-tools
+        - oddjob
+        - oddjob-mkhomedir
+        - samba-common
+        - openldap-clients
+        - policycoreutils-python
+      when: ansible_distribution == 'Amazon'
+
+    - name: Install sendmail
+      ansible.builtin.package:
+        name: sendmail
+        state: present
+
+    - name: Install curl
+      ansible.builtin.package:
+        name: curl
+        state: present
+
+    - name: Install libplist-utils
+      ansible.builtin.package:
+        name: libplist-utils
+        state: present
+      when: ansible_distribution == 'Ubuntu'
+
+    - name: Install yum-utils
+      ansible.builtin.package:
+        name: yum-utils
+        state: present
+      when: ansible_distribution == 'Amazon'
+
+    - name: Install gpg
+      ansible.builtin.package:
+        name: gpg
+        state: present
+
+    - name: Add Microsoft yum repository
+      shell: yum-config-manager --add-repo=https://packages.microsoft.com/config/rhel/7.2/prod.repo
+      args:
+        creates: /etc/yum.repos.d/prod.repo
+      when: ansible_distribution == 'Amazon'
+
+    - name: Add Microsoft apt repository
+      ansible.builtin.get_url:
+        url: https://packages.microsoft.com/config/ubuntu/20.04/prod.list
+        dest: /etc/apt/sources.list.d/microsoft-prod.list
+      when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '20.04'
+
+    - name: Add Microsoft apt repository
+      ansible.builtin.get_url:
+        url: https://packages.microsoft.com/config/ubuntu/22.04/prod.list
+        dest: /etc/apt/sources.list.d/microsoft-prod.list
+      when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '22.04'
+
+    - name: Get GPG Key
+      ansible.builtin.get_url:
+        url: https://packages.microsoft.com/keys/microsoft.asc
+        dest: /tmp/microsoft.asc
+      when: ansible_distribution == 'Ubuntu'
+
+    - name: Install GPG Key in trusted.gpg.d
+      shell: cat /tmp/microsoft.asc | gpg --dearmor | sudo cat - > /etc/apt/trusted.gpg.d/microsoft.gpg
+      args:
+        creates: /etc/apt/trusted.gpg.d/microsoft.gpg
+      when: ansible_distribution == 'Ubuntu'
+
+    - name: Install apt-transport-https
+      ansible.builtin.package:
+        name: apt-transport-https
+        state: present
+      when: ansible_distribution == 'Ubuntu'
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        force_apt_get: true
+      when: ansible_distribution == 'Ubuntu'
+
+    - name: Install mdatp
+      ansible.builtin.package:
+        name: mdatp
+        state: present
+
+    - name: Install sysstat
+      ansible.builtin.package:
+        name: sysstat
+        state: present
+
+    - name: Install traceroute
+      ansible.builtin.package:
+        name: traceroute
+        state: present
+
+    - name: Install net-tools
+      ansible.builtin.package:
+        name: net-tools
+        state: present
+
+    - name: Install iftop
+      ansible.builtin.package:
+        name: iftop
+        state: present
+      when: ansible_distribution == 'Ubuntu'
+        
