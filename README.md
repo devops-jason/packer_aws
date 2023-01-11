@@ -1,29 +1,14 @@
-# README #
+# Packer #
 
-This README would normally document whatever steps are necessary to get your application up and running.
+This is used to build standard OS images.  You should validate the packer file before building the images.
 
-### What is this repository for? ###
+## Validate
+The following command is used to validate the packer file.
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+`packer validate dbi.pkr.hcl`
 
-### How do I get set up? ###
+## Build
+In order to build the AMI's for AWS.  Run the following command to start the build process
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+`packer build dbi.pkr.hcl`
 
-### Contribution guidelines ###
-
-* Writing tests
-* Code review
-* Other guidelines
-
-### Who do I talk to? ###
-
-* Repo owner or admin
-* Other community or team contact
